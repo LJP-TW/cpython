@@ -1270,6 +1270,7 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\os.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\Lib\\site.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\site.py") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\enum.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "<string>") 
 //            && (
 //            !strcmp("<module>", PyUnicode_DATA(co->co_name))
