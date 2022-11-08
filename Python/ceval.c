@@ -1254,12 +1254,20 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
         printf("%s %s\n", PyUnicode_DATA(co->co_name), PyUnicode_DATA(co->co_filename));
 
         if (
-            strcmp("<frozen importlib._bootstrap>", PyUnicode_DATA(co->co_filename)) 
+            strcmp(PyUnicode_DATA(co->co_filename), "<frozen importlib._bootstrap>") 
+            && strcmp(PyUnicode_DATA(co->co_filename), "<frozen importlib._bootstrap_external>") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\io.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\ntpath.py") 
-            && (
-            !strcmp("<module>", PyUnicode_DATA(co->co_name))
-            || !strcmp("add", PyUnicode_DATA(co->co_name))
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\sre_constants.py") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\codecs.py") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\utf_8.py") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\encodings\\__init__.py") 
+            && strcmp(PyUnicode_DATA(co->co_name), "__repr__") 
+            && strcmp(PyUnicode_DATA(co->co_name), "<genexpr>") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\Lib\\_sitebuiltins.py") 
+//            && (
+//            !strcmp("<module>", PyUnicode_DATA(co->co_name))
+//            || !strcmp("add", PyUnicode_DATA(co->co_name))
 //          || !strcmp("<genexpr>", PyUnicode_DATA(co->co_name))
 //          || !strcmp("<listcomp>", PyUnicode_DATA(co->co_name))
 //          || !strcmp("_verbose_message", PyUnicode_DATA(co->co_name))
@@ -1271,7 +1279,7 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 //          || !strcmp("get_code", PyUnicode_DATA(co->co_name))
 //          || !strcmp("_makecodes", PyUnicode_DATA(co->co_name))
 //          || !strcmp("<setcomp>", PyUnicode_DATA(co->co_nam
-            )
+//            )
         ) {
             ljptrace = 1;
         }
