@@ -1251,8 +1251,6 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
         runljpprtrace = 1;
         ljptrace = 0;
 
-        printf("%s %s\n", PyUnicode_DATA(co->co_name), PyUnicode_DATA(co->co_filename));
-
         if (
             strcmp(PyUnicode_DATA(co->co_filename), "<frozen importlib._bootstrap>") 
             && strcmp(PyUnicode_DATA(co->co_filename), "<frozen importlib._bootstrap_external>") 
@@ -1271,6 +1269,7 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             && !strstr(PyUnicode_DATA(co->co_filename), "\\Lib\\site.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\site.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\enum.py") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\types.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "<string>") 
 //            && (
 //            !strcmp("<module>", PyUnicode_DATA(co->co_name))
@@ -1310,8 +1309,8 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
         // }
         
         if (ljptrace && showljptrace) {
-            // Function name
-            printf("%s ", PyUnicode_DATA(co->co_name));
+            // File & Function name
+            printf("%s %s ", PyUnicode_DATA(co->co_filename), PyUnicode_DATA(co->co_name));
 
             if (HAS_ARG(opcode)) {
                 if (opcode_infos[opcode].op_flag & NAME_OP) {
