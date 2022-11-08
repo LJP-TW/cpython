@@ -22,11 +22,191 @@
 
 #include <ctype.h>
 
+#define NAME_OP  1
+#define LOCAL_OP 2
+#define CONST_OP 4
+#define JREL_OP  8
+#define JABS_OP  16
+#define CMP_OP   32
+#define FREE_OP  64
+
+typedef struct {
+    char *op_name;
+    int op_flag;
+} opcode_info_t;
+
+opcode_info_t opcode_infos[] = {
+{ "INVALID_0", 0 },
+{ "POP_TOP", 0 },
+{ "ROT_TWO", 0 },
+{ "ROT_THREE", 0 },
+{ "DUP_TOP", 0 },
+{ "DUP_TOP_TWO", 0 },
+{ "INVALID_6", 0 },
+{ "INVALID_7", 0 },
+{ "INVALID_8", 0 },
+{ "NOP", 0 },
+{ "UNARY_POSITIVE", 0 },
+{ "UNARY_NEGATIVE", 0 },
+{ "UNARY_NOT", 0 },
+{ "INVALID_13", 0 },
+{ "INVALID_14", 0 },
+{ "UNARY_INVERT", 0 },
+{ "BINARY_MATRIX_MULTIPLY", 0 },
+{ "INPLACE_MATRIX_MULTIPLY", 0 },
+{ "INVALID_18", 0 },
+{ "BINARY_POWER", 0 },
+{ "BINARY_MULTIPLY", 0 },
+{ "INVALID_21", 0 },
+{ "BINARY_MODULO", 0 },
+{ "BINARY_ADD", 0 },
+{ "BINARY_SUBTRACT", 0 },
+{ "BINARY_SUBSCR", 0 },
+{ "BINARY_FLOOR_DIVIDE", 0 },
+{ "BINARY_TRUE_DIVIDE", 0 },
+{ "INPLACE_FLOOR_DIVIDE", 0 },
+{ "INPLACE_TRUE_DIVIDE", 0 },
+{ "INVALID_30", 0 },
+{ "INVALID_31", 0 },
+{ "INVALID_32", 0 },
+{ "INVALID_33", 0 },
+{ "INVALID_34", 0 },
+{ "INVALID_35", 0 },
+{ "INVALID_36", 0 },
+{ "INVALID_37", 0 },
+{ "INVALID_38", 0 },
+{ "INVALID_39", 0 },
+{ "INVALID_40", 0 },
+{ "INVALID_41", 0 },
+{ "INVALID_42", 0 },
+{ "INVALID_43", 0 },
+{ "INVALID_44", 0 },
+{ "INVALID_45", 0 },
+{ "INVALID_46", 0 },
+{ "INVALID_47", 0 },
+{ "INVALID_48", 0 },
+{ "INVALID_49", 0 },
+{ "GET_AITER", 0 },
+{ "GET_ANEXT", 0 },
+{ "BEFORE_ASYNC_WITH", 0 },
+{ "INVALID_53", 0 },
+{ "INVALID_54", 0 },
+{ "INPLACE_ADD", 0 },
+{ "INPLACE_SUBTRACT", 0 },
+{ "INPLACE_MULTIPLY", 0 },
+{ "INVALID_58", 0 },
+{ "INPLACE_MODULO", 0 },
+{ "STORE_SUBSCR", 0 },
+{ "DELETE_SUBSCR", 0 },
+{ "BINARY_LSHIFT", 0 },
+{ "BINARY_RSHIFT", 0 },
+{ "BINARY_AND", 0 },
+{ "BINARY_XOR", 0 },
+{ "BINARY_OR", 0 },
+{ "INPLACE_POWER", 0 },
+{ "GET_ITER", 0 },
+{ "GET_YIELD_FROM_ITER", 0 },
+{ "PRINT_EXPR", 0 },
+{ "LOAD_BUILD_CLASS", 0 },
+{ "YIELD_FROM", 0 },
+{ "GET_AWAITABLE", 0 },
+{ "INVALID_74", 0 },
+{ "INPLACE_LSHIFT", 0 },
+{ "INPLACE_RSHIFT", 0 },
+{ "INPLACE_AND", 0 },
+{ "INPLACE_XOR", 0 },
+{ "INPLACE_OR", 0 },
+{ "BREAK_LOOP", 0 },
+{ "WITH_CLEANUP_START", 0 },
+{ "WITH_CLEANUP_FINISH", 0 },
+{ "RETURN_VALUE", 0 },
+{ "IMPORT_STAR", 0 },
+{ "SETUP_ANNOTATIONS", 0 },
+{ "YIELD_VALUE", 0 },
+{ "POP_BLOCK", 0 },
+{ "END_FINALLY", 0 },
+{ "POP_EXCEPT", 0 },
+{ "HAVE_ARGUMENT_OR_STORE_NAME", NAME_OP },
+{ "DELETE_NAME", NAME_OP },
+{ "UNPACK_SEQUENCE", 0 },
+{ "FOR_ITER", JREL_OP },
+{ "UNPACK_EX", 0 },
+{ "STORE_ATTR", NAME_OP },
+{ "DELETE_ATTR", NAME_OP },
+{ "STORE_GLOBAL", NAME_OP },
+{ "DELETE_GLOBAL", NAME_OP },
+{ "INVALID_99", 0 },
+{ "LOAD_CONST", CONST_OP },
+{ "LOAD_NAME", NAME_OP },
+{ "BUILD_TUPLE", 0 },
+{ "BUILD_LIST", 0 },
+{ "BUILD_SET", 0 },
+{ "BUILD_MAP", 0 },
+{ "LOAD_ATTR", NAME_OP },
+{ "COMPARE_OP", CMP_OP },
+{ "IMPORT_NAME", NAME_OP },
+{ "IMPORT_FROM", NAME_OP },
+{ "JUMP_FORWARD", JREL_OP },
+{ "JUMP_IF_FALSE_OR_POP", JABS_OP },
+{ "JUMP_IF_TRUE_OR_POP", JABS_OP },
+{ "JUMP_ABSOLUTE", JABS_OP },
+{ "POP_JUMP_IF_FALSE", JABS_OP },
+{ "POP_JUMP_IF_TRUE", JABS_OP },
+{ "LOAD_GLOBAL", NAME_OP },
+{ "INVALID_117", 0 },
+{ "INVALID_118", 0 },
+{ "CONTINUE_LOOP", JABS_OP },
+{ "SETUP_LOOP", JREL_OP },
+{ "SETUP_EXCEPT", JREL_OP },
+{ "SETUP_FINALLY", JREL_OP },
+{ "INVALID_123", 0 },
+{ "LOAD_FAST", LOCAL_OP },
+{ "STORE_FAST", LOCAL_OP },
+{ "DELETE_FAST", LOCAL_OP },
+{ "INVALID_127", 0 },
+{ "INVALID_128", 0 },
+{ "INVALID_129", 0 },
+{ "RAISE_VARARGS", 0 },
+{ "CALL_FUNCTION", 0 },
+{ "MAKE_FUNCTION", 0 },
+{ "BUILD_SLICE", 0 },
+{ "INVALID_134", 0 },
+{ "LOAD_CLOSURE", FREE_OP },
+{ "LOAD_DEREF", FREE_OP },
+{ "STORE_DEREF", FREE_OP },
+{ "DELETE_DEREF", FREE_OP },
+{ "INVALID_139", 0 },
+{ "INVALID_140", 0 },
+{ "CALL_FUNCTION_KW", 0 },
+{ "CALL_FUNCTION_EX", 0 },
+{ "SETUP_WITH", JREL_OP },
+{ "EXTENDED_ARG", 0 },
+{ "LIST_APPEND", 0 },
+{ "SET_ADD", 0 },
+{ "MAP_ADD", 0 },
+{ "LOAD_CLASSDEREF", FREE_OP },
+{ "BUILD_LIST_UNPACK", 0 },
+{ "BUILD_MAP_UNPACK", 0 },
+{ "BUILD_MAP_UNPACK_WITH_CALL", 0 },
+{ "BUILD_TUPLE_UNPACK", 0 },
+{ "BUILD_SET_UNPACK", 0 },
+{ "SETUP_ASYNC_WITH", JREL_OP },
+{ "FORMAT_VALUE", 0 },
+{ "BUILD_CONST_KEY_MAP", 0 },
+{ "BUILD_STRING", 0 },
+{ "BUILD_TUPLE_UNPACK_WITH_CALL", 0 },
+{ "INVALID_159", 0 },
+{ "LOAD_METHOD", NAME_OP },
+{ "CALL_METHOD", 0 },
+};
+
 #ifdef Py_DEBUG
 /* For debugging the interpreter: */
 #define LLTRACE  1      /* Low-level trace feature */
 #define CHECKEXC 1      /* Double-check exception checking */
 #endif
+
+#define LJPTRACE 1
 
 /* Private API for the LOAD_METHOD opcode. */
 extern int _PyObject_GetMethod(PyObject *, PyObject *, PyObject **);
@@ -38,7 +218,11 @@ Py_LOCAL_INLINE(PyObject *) call_function(PyObject ***, Py_ssize_t,
                                           PyObject *);
 static PyObject * do_call_core(PyObject *, PyObject *, PyObject *);
 
-#ifdef LLTRACE
+#ifdef LJPTRACE
+static int ljptrace;
+static int runljpprtrace;
+static int ljpprtrace(PyObject *, const char *);
+#elif LLTRACE
 static int lltrace;
 static int prtrace(PyObject *, const char *);
 #endif
@@ -576,7 +760,9 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
     PyObject *names;
     PyObject *consts;
 
-#ifdef LLTRACE
+#ifdef LJPTRACE
+    _Py_IDENTIFIER(__ljptrace__);
+#elif LLTRACE
     _Py_IDENTIFIER(__ltrace__);
 #endif
 
@@ -768,7 +954,19 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 #define BASIC_PUSH(v)     (*stack_pointer++ = (v))
 #define BASIC_POP()       (*--stack_pointer)
 
-#ifdef LLTRACE
+#ifdef LJPTRACE
+#define PUSH(v)         { (void)(BASIC_PUSH(v), \
+                          ljptrace && runljpprtrace && ljpprtrace(TOP(), "push")); \
+                          assert(STACK_LEVEL() <= co->co_stacksize); }
+#define POP()           ((void)(ljptrace && runljpprtrace && ljpprtrace(TOP(), "pop")), \
+                         BASIC_POP())
+#define STACKADJ(n)     { (void)(BASIC_STACKADJ(n), \
+                          ljptrace && runljpprtrace && ljpprtrace(TOP(), "stackadj")); \
+                          assert(STACK_LEVEL() <= co->co_stacksize); }
+#define EXT_POP(STACK_POINTER) ((void)(ljptrace && runljpprtrace && \
+                                ljpprtrace((STACK_POINTER)[-1], "ext_pop")), \
+                                *--(STACK_POINTER))
+#elif LLTRACE
 #define PUSH(v)         { (void)(BASIC_PUSH(v), \
                           lltrace && prtrace(TOP(), "push")); \
                           assert(STACK_LEVEL() <= co->co_stacksize); }
@@ -911,7 +1109,9 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
     f->f_executing = 1;
 
 
-#ifdef LLTRACE
+#ifdef LJPTRACE
+    // ljptrace = _PyDict_GetItemId(f->f_globals, &PyId___ljptrace__) != NULL;
+#elif LLTRACE
     lltrace = _PyDict_GetItemId(f->f_globals, &PyId___ltrace__) != NULL;
 #endif
 
@@ -1046,7 +1246,100 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
         dxp[opcode]++;
 #endif
 
-#ifdef LLTRACE
+#ifdef LJPTRACE
+        int showljptrace = 1;
+        runljpprtrace = 1;
+        ljptrace = 0;
+
+        printf("%s %s\n", PyUnicode_DATA(co->co_name), PyUnicode_DATA(co->co_filename));
+
+        if (
+            strcmp("<frozen importlib._bootstrap>", PyUnicode_DATA(co->co_filename)) 
+            && strcmp("C:\\Users\\pt\\Documents\\git\\cpython\\lib\\io.py", PyUnicode_DATA(co->co_filename)) 
+            && (
+            !strcmp("<module>", PyUnicode_DATA(co->co_name))
+            || !strcmp("add", PyUnicode_DATA(co->co_name))
+//          || !strcmp("<genexpr>", PyUnicode_DATA(co->co_name))
+//          || !strcmp("<listcomp>", PyUnicode_DATA(co->co_name))
+//          || !strcmp("_verbose_message", PyUnicode_DATA(co->co_name))
+//          || !strcmp("_path_isfile", PyUnicode_DATA(co->co_name))
+//          || !strcmp("spec_from_file_location", PyUnicode_DATA(co->co_name))
+//          || !strcmp("create_module", PyUnicode_DATA(co->co_name))
+//          || !strcmp("cb", PyUnicode_DATA(co->co_name))
+//          || !strcmp("exec_module", PyUnicode_DATA(co->co_name))
+//          || !strcmp("get_code", PyUnicode_DATA(co->co_name))
+//          || !strcmp("_makecodes", PyUnicode_DATA(co->co_name))
+//          || !strcmp("<setcomp>", PyUnicode_DATA(co->co_nam
+            )
+        ) {
+            ljptrace = 1;
+        }
+
+        // if (!ljptrace &&
+        //     !strcmp("<module>", PyUnicode_DATA(co->co_name)) &&
+        //     opcode == 108) {
+        //     PyObject *name = GETITEM(names, oparg);
+        //     if (!strcmp("pytransform", PyUnicode_DATA(name))) {
+        //         ljptrace = 1;
+        //     }
+        // } else if (ljptrace && (
+        //                 !strcmp("module_repr", PyUnicode_DATA(co->co_name)) ||
+        //                 !strcmp("_module_repr", PyUnicode_DATA(co->co_name)) ||
+        //                 !strcmp("__repr__", PyUnicode_DATA(co->co_name)) ||
+        //                 !strcmp("_find_and_load", PyUnicode_DATA(co->co_name)) ||
+        //                 !strcmp("__enter__", PyUnicode_DATA(co->co_name))
+        //            )) {
+        //     runljpprtrace = 0;
+        //     showljptrace = 0;
+        // }
+        
+        if (ljptrace && showljptrace) {
+            // Function name
+            printf("%s ", PyUnicode_DATA(co->co_name));
+
+            if (HAS_ARG(opcode)) {
+                if (opcode_infos[opcode].op_flag & NAME_OP) {
+                    PyObject *name = GETITEM(names, oparg);
+                    printf("%d: %s(%d), %d (%s)",
+                        f->f_lasti, opcode_infos[opcode].op_name, opcode, oparg, PyUnicode_DATA(name));
+                } else if (opcode_infos[opcode].op_flag & LOCAL_OP) {
+                    PyObject *raw = PyTuple_GET_ITEM(co->co_varnames, oparg);
+                    PyObject *name = PyObject_Repr(raw);
+                    printf("%d: %s(%d), %d (%s)",
+                        f->f_lasti, opcode_infos[opcode].op_name, opcode, oparg, PyUnicode_DATA(name));
+                } else if (opcode_infos[opcode].op_flag & CONST_OP) {
+                    PyObject *value = GETITEM(consts, oparg);
+                    PyObject *name = PyObject_Repr(value);
+                    printf("%d: %s(%d), %d (%s)",
+                        f->f_lasti, opcode_infos[opcode].op_name, opcode, oparg, PyUnicode_DATA(name));
+                } else if (opcode_infos[opcode].op_flag & JREL_OP) {
+                    printf("%d: %s(%d), %d (%s)",
+                        f->f_lasti, opcode_infos[opcode].op_name, opcode, oparg, "TODO");
+                } else if (opcode_infos[opcode].op_flag & JABS_OP) {
+                    printf("%d: %s(%d), %d (%s)",
+                        f->f_lasti, opcode_infos[opcode].op_name, opcode, oparg, "TODO");
+                } else if (opcode_infos[opcode].op_flag & CMP_OP) {
+                    printf("%d: %s(%d), %d (%s)",
+                        f->f_lasti, opcode_infos[opcode].op_name, opcode, oparg, "TODO");
+                } else if (opcode_infos[opcode].op_flag & FREE_OP) {
+                    printf("%d: %s(%d), %d (%s)",
+                        f->f_lasti, opcode_infos[opcode].op_name, opcode, oparg, "TODO");
+                } else {
+                    printf("%d: %s(%d), %d",
+                        f->f_lasti, opcode_infos[opcode].op_name, opcode, oparg);
+                }
+            } else {
+                printf("%d: %s(%d)",
+                       f->f_lasti, opcode_infos[opcode].op_name, opcode);
+            }
+            
+            if (runljpprtrace) {
+                printf("; ");
+            } else {
+                printf("\n");
+            }
+        }
+#elif LLTRACE
         /* Instruction tracing */
 
         if (lltrace) {
@@ -4175,8 +4468,65 @@ Error:
     return 0;
 }
 
+#ifdef LJPTRACE
+static int
+ljpprtrace(PyObject *op, const char *str)
+{
+    printf("%s ", str);
+    if (PyObject_Print(op, stdout, 0) != 0)
+        PyErr_Clear(); /* Don't know what else to do */
+    printf("\n");
+    return 1;
 
-#ifdef LLTRACE
+    printf("%s ", str);
+    
+    if (op == NULL) {
+        fprintf(stdout, "<nil>");
+        printf("\n");
+        return 1;
+    } 
+    
+    if (op->ob_refcnt <= 0) {
+        fprintf(stdout, "<refcnt %ld at %p>",
+            (long)op->ob_refcnt, op);
+        printf("\n");
+        return 1;
+    }
+
+    PyObject *s;
+    s = PyObject_Str(op);
+
+    if (s == NULL) {
+        printf("\n");
+        return 1;
+    }
+
+    if (PyBytes_Check(s)) {
+        fwrite(PyBytes_AS_STRING(s), 1,
+               PyBytes_GET_SIZE(s), stdout);
+        printf("\n");
+        return 1;
+    }
+
+    if (PyUnicode_Check(s)) {
+        PyObject *t;
+        t = PyUnicode_AsEncodedString(s, "utf-8", "backslashreplace");
+        if (t == NULL) {
+            printf("\n");
+            return 1;
+        } else {
+            fwrite(PyBytes_AS_STRING(t), 1,
+                   PyBytes_GET_SIZE(t), stdout);
+            Py_DECREF(t);
+            printf("\n");
+            return 1;
+        }
+    }
+
+    printf("Error!\n");
+    return 1;
+}
+#elif LLTRACE
 static int
 prtrace(PyObject *v, const char *str)
 {
