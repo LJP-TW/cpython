@@ -960,12 +960,8 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
                           assert(STACK_LEVEL() <= co->co_stacksize); }
 #define POP()           ((void)(ljptrace && runljpprtrace && ljpprtrace(TOP(), "pop")), \
                          BASIC_POP())
-#define STACKADJ(n)     { (void)(BASIC_STACKADJ(n), \
-                          ljptrace && runljpprtrace && ljpprtrace(TOP(), "stackadj")); \
-                          assert(STACK_LEVEL() <= co->co_stacksize); }
-#define EXT_POP(STACK_POINTER) ((void)(ljptrace && runljpprtrace && \
-                                ljpprtrace((STACK_POINTER)[-1], "ext_pop")), \
-                                *--(STACK_POINTER))
+#define STACKADJ(n)            BASIC_STACKADJ(n)
+#define EXT_POP(STACK_POINTER) (*--(STACK_POINTER))
 #elif LLTRACE
 #define PUSH(v)         { (void)(BASIC_PUSH(v), \
                           lltrace && prtrace(TOP(), "push")); \
@@ -1252,11 +1248,13 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
         ljptrace = 0;
 
         if (
+            strstr(PyUnicode_DATA(co->co_filename), "\\site-packages\\") 
+            || (
             strcmp(PyUnicode_DATA(co->co_filename), "<frozen importlib._bootstrap>") 
             && strcmp(PyUnicode_DATA(co->co_filename), "<frozen importlib._bootstrap_external>") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\io.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\ntpath.py") 
-            && !strstr(PyUnicode_DATA(co->co_filename), "\\sre_constants.py") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\sre_") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\codecs.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\utf_8.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\encodings\\__init__.py") 
@@ -1273,6 +1271,7 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\tokenize.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\threading.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "<string>") 
+            )
 //            && (
 //            !strcmp("<module>", PyUnicode_DATA(co->co_name))
 //            || !strcmp("add", PyUnicode_DATA(co->co_name))
@@ -4490,57 +4489,24 @@ static int
 ljpprtrace(PyObject *op, const char *str)
 {
     printf("%s ", str);
-    if (PyObject_Print(op, stdout, 0) != 0)
-        PyErr_Clear(); /* Don't know what else to do */
-    printf("\n");
-    return 1;
-
-    printf("%s ", str);
     
-    if (op == NULL) {
-        fprintf(stdout, "<nil>");
-        printf("\n");
-        return 1;
-    } 
-    
-    if (op->ob_refcnt <= 0) {
-        fprintf(stdout, "<refcnt %ld at %p>",
-            (long)op->ob_refcnt, op);
-        printf("\n");
+    if (!op) {
+        printf("None\n");
         return 1;
     }
 
-    PyObject *s;
-    s = PyObject_Str(op);
+    if (op->ob_type && op->ob_type->tp_name) {
+        printf("[%s] ", op->ob_type->tp_name);
+    } else {
+        printf("[??] ");
+    }
 
-    if (s == NULL) {
-        printf("\n");
+    if (PyUnicode_CheckExact(op)) {
+        printf("%s\n", PyUnicode_DATA(op));
         return 1;
-    }
+    }    
 
-    if (PyBytes_Check(s)) {
-        fwrite(PyBytes_AS_STRING(s), 1,
-               PyBytes_GET_SIZE(s), stdout);
-        printf("\n");
-        return 1;
-    }
-
-    if (PyUnicode_Check(s)) {
-        PyObject *t;
-        t = PyUnicode_AsEncodedString(s, "utf-8", "backslashreplace");
-        if (t == NULL) {
-            printf("\n");
-            return 1;
-        } else {
-            fwrite(PyBytes_AS_STRING(t), 1,
-                   PyBytes_GET_SIZE(t), stdout);
-            Py_DECREF(t);
-            printf("\n");
-            return 1;
-        }
-    }
-
-    printf("Error!\n");
+    printf("<not support>\n");
     return 1;
 }
 #elif LLTRACE
