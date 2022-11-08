@@ -1271,6 +1271,7 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\enum.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\types.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\tokenize.py") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\threading.py") 
             && !strstr(PyUnicode_DATA(co->co_filename), "<string>") 
 //            && (
 //            !strcmp("<module>", PyUnicode_DATA(co->co_name))
