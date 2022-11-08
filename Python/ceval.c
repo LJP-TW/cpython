@@ -1255,7 +1255,8 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
 
         if (
             strcmp("<frozen importlib._bootstrap>", PyUnicode_DATA(co->co_filename)) 
-            && strcmp("C:\\Users\\pt\\Documents\\git\\cpython\\lib\\io.py", PyUnicode_DATA(co->co_filename)) 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\io.py") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\ntpath.py") 
             && (
             !strcmp("<module>", PyUnicode_DATA(co->co_name))
             || !strcmp("add", PyUnicode_DATA(co->co_name))
