@@ -1265,6 +1265,7 @@ _PyEval_EvalFrameDefault(PyFrameObject *f, int throwflag)
             && strcmp(PyUnicode_DATA(co->co_name), "__repr__") 
             && strcmp(PyUnicode_DATA(co->co_name), "<genexpr>") 
             && !strstr(PyUnicode_DATA(co->co_filename), "\\Lib\\_sitebuiltins.py") 
+            && !strstr(PyUnicode_DATA(co->co_filename), "\\lib\\_sitebuiltins.py") 
 //            && (
 //            !strcmp("<module>", PyUnicode_DATA(co->co_name))
 //            || !strcmp("add", PyUnicode_DATA(co->co_name))
