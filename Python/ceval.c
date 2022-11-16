@@ -4504,7 +4504,18 @@ ljpprtrace(PyObject *op, const char *str)
     if (PyUnicode_CheckExact(op)) {
         printf("%s\n", PyUnicode_DATA(op));
         return 1;
-    }    
+    } else if (
+        op->ob_type 
+        && op->ob_type->tp_name
+        && !strcmp("bytes", op->ob_type->tp_name)
+    ) {
+        PyObject *res = (*op->ob_type->tp_repr)(op);
+
+        if (PyUnicode_CheckExact(res)) {
+            printf("%s\n", PyUnicode_DATA(res));
+            return 1;
+        }
+    }
 
     printf("<not support>\n");
     return 1;
